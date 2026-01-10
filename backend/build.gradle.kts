@@ -24,6 +24,7 @@ val exposedVersion = "0.58.0"
 val postgresVersion = "42.7.4"
 val hikariVersion = "6.2.1"
 val logbackVersion = "1.5.15"
+val flywayVersion = "11.20.0"
 
 dependencies {
     // Ktor Server
@@ -41,6 +42,10 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
+
+    // Flyway migrations
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 
     // Logging
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
