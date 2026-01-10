@@ -103,8 +103,24 @@ smena/
 
 ## Версии зависимостей
 
-Перед добавлением зависимостей в build.gradle.kts или package.json — 
+Перед добавлением зависимостей в build.gradle.kts или package.json —
 проверь актуальные версии через веб-поиск или официальную документацию.
+
+## Настройка окружения
+
+### Backend: переменные окружения
+
+Секреты (пароли БД, API токены) хранятся в `backend/.env` (не коммитится).
+
+**Первый запуск:**
+1. Скопировать `backend/.env.example` → `backend/.env`
+2. Изменить значения под свою конфигурацию
+3. Запускать через `./run.sh` (автоматически загружает .env)
+
+**Доступные переменные:**
+- `DATABASE_URL` — JDBC URL базы данных
+- `DATABASE_USER` — имя пользователя БД
+- `DATABASE_PASSWORD` — пароль БД
 
 ## Команды для работы
 
@@ -123,8 +139,8 @@ cat docs/plan/T-001.md
 # Посмотреть задачи
 cat docs/tasklist/T-001.md
 
-# Backend: запуск
-cd backend && ./gradlew run
+# Backend: запуск (загружает .env переменные)
+cd backend && ./run.sh
 
 # Backend: тесты
 cd backend && ./gradlew test
