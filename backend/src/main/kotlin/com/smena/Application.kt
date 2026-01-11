@@ -13,6 +13,7 @@ fun Application.module() {
 
     configureContentNegotiation()
     configureCORS()
+    configureAuthentication()
     configureStatusPages()
     configureRouting()
 }
