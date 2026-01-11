@@ -2,6 +2,7 @@ package com.smena.plugins
 
 import com.smena.dto.ErrorDetail
 import com.smena.dto.ErrorResponse
+import com.smena.exceptions.InvalidInitDataException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
@@ -9,6 +10,18 @@ import io.ktor.server.response.*
 
 fun Application.configureStatusPages() {
     install(StatusPages) {
+        exception<InvalidInitDataException> { call, cause ->
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "INVALID_INIT_DATA",
+                        message = cause.message ?: "Invalid Telegram initData"
+                    )
+                )
+            )
+        }
+
         exception<Throwable> { call, cause ->
             call.application.log.error("Unhandled exception", cause)
             call.respond(

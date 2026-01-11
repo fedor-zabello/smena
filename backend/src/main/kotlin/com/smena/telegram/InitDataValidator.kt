@@ -33,12 +33,15 @@ object InitDataValidator {
 
     private val json = Json { ignoreUnknownKeys = true }
 
+    /** Максимальный возраст initData: 5 минут */
+    private const val MAX_AGE_SECONDS = 300L
+
     /**
      * Валидирует initData и возвращает данные пользователя.
      *
      * @param initData URL-encoded строка от Telegram (например: "user=%7B...%7D&auth_date=123&hash=abc")
      * @param botToken Токен Telegram бота
-     * @return TelegramUser если подпись валидна, null если невалидна или данные повреждены
+     * @return TelegramUser если подпись валидна, null если невалидна или данные устарели
      */
     fun validate(initData: String, botToken: String): TelegramUser? {
         return try {
@@ -46,6 +49,13 @@ object InitDataValidator {
 
             val hash = params["hash"] ?: return null
             val userJson = params["user"] ?: return null
+            val authDate = params["auth_date"]?.toLongOrNull() ?: return null
+
+            // Проверяем, что initData не устарела (защита от replay attacks)
+            val currentTime = System.currentTimeMillis() / 1000
+            if (currentTime - authDate > MAX_AGE_SECONDS) {
+                return null
+            }
 
             // Формируем строку для проверки (все параметры кроме hash, отсортированные по ключу)
             val dataCheckString = params

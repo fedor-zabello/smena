@@ -136,6 +136,34 @@ class InitDataValidatorTest {
         assertNull(result)
     }
 
+    @Test
+    fun `validate returns null for expired auth_date`() {
+        val tenMinutesAgo = System.currentTimeMillis() / 1000 - 600 // 10 минут назад
+        val initData = createValidInitData(
+            telegramId = 123456789,
+            firstName = "Ivan",
+            lastName = null,
+            username = null,
+            botToken = testBotToken,
+            authDate = tenMinutesAgo
+        )
+
+        val result = InitDataValidator.validate(initData, testBotToken)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `validate returns null for missing auth_date`() {
+        val userJson = """{"id":123,"first_name":"Test"}"""
+        val hash = "somehash"
+        val initData = "user=${urlEncode(userJson)}&hash=$hash"
+
+        val result = InitDataValidator.validate(initData, testBotToken)
+
+        assertNull(result)
+    }
+
     /**
      * Создаёт валидную initData строку с правильной подписью.
      * Используется для тестирования.
@@ -145,7 +173,8 @@ class InitDataValidatorTest {
         firstName: String,
         lastName: String?,
         username: String?,
-        botToken: String
+        botToken: String,
+        authDate: Long = System.currentTimeMillis() / 1000
     ): String {
         val userJson = buildString {
             append("""{"id":$telegramId,"first_name":"$firstName"""")
@@ -153,8 +182,6 @@ class InitDataValidatorTest {
             username?.let { append(""","username":"$it"""") }
             append("}")
         }
-
-        val authDate = System.currentTimeMillis() / 1000
 
         val params = mapOf(
             "user" to userJson,
