@@ -2,7 +2,9 @@ package com.smena.plugins
 
 import com.smena.dto.ErrorDetail
 import com.smena.dto.ErrorResponse
+import com.smena.exceptions.ForbiddenException
 import com.smena.exceptions.InvalidInitDataException
+import com.smena.exceptions.TeamNotFoundException
 import com.smena.exceptions.UnauthorizedException
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -30,6 +32,30 @@ fun Application.configureStatusPages() {
                     error = ErrorDetail(
                         code = "UNAUTHORIZED",
                         message = cause.message ?: "Unauthorized"
+                    )
+                )
+            )
+        }
+
+        exception<TeamNotFoundException> { call, cause ->
+            call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "TEAM_NOT_FOUND",
+                        message = cause.message ?: "Team not found"
+                    )
+                )
+            )
+        }
+
+        exception<ForbiddenException> { call, cause ->
+            call.respond(
+                HttpStatusCode.Forbidden,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "FORBIDDEN",
+                        message = cause.message ?: "Access denied"
                     )
                 )
             )
