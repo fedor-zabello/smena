@@ -55,4 +55,17 @@ class TeamService(
         val memberCount = teamMemberRepository.findAllByTeamId(team.id).size
         return team.toResponse(role = TeamRole.PLAYER.name, memberCount = memberCount)
     }
+
+    fun regenerateInviteCode(teamId: Long, userId: Long): TeamResponse {
+        val membership = teamMemberRepository.findByUserAndTeam(userId, teamId)
+            ?: throw ForbiddenException("You are not a member of this team")
+
+        if (membership.role != TeamRole.ADMIN) {
+            throw ForbiddenException("Only team admins can regenerate invite code")
+        }
+
+        val team = teamRepository.updateInviteCode(teamId)
+        val memberCount = teamMemberRepository.findAllByTeamId(teamId).size
+        return team.toResponse(role = membership.role.name, memberCount = memberCount)
+    }
 }

@@ -39,5 +39,13 @@ fun Route.teamRoutes(teamService: TeamService) {
             val team = teamService.getTeamById(teamId, user.id)
             call.respond(SuccessResponse(data = team))
         }
+
+        post("/{id}/regenerate-code") {
+            val user = currentUser
+            val teamId = call.parameters["id"]?.toLongOrNull()
+                ?: return@post call.respond(HttpStatusCode.BadRequest, "Invalid team ID")
+            val response = teamService.regenerateInviteCode(teamId, user.id)
+            call.respond(SuccessResponse(data = response))
+        }
     }
 }
