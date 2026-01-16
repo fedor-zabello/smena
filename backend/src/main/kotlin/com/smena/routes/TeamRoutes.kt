@@ -3,6 +3,7 @@ package com.smena.routes
 import com.smena.dto.CreateTeamRequest
 import com.smena.dto.JoinTeamRequest
 import com.smena.dto.SuccessResponse
+import com.smena.dto.UpdateMemberRequest
 import com.smena.plugins.currentUser
 import com.smena.services.TeamService
 import io.ktor.http.*
@@ -46,6 +47,43 @@ fun Route.teamRoutes(teamService: TeamService) {
                 ?: return@post call.respond(HttpStatusCode.BadRequest, "Invalid team ID")
             val response = teamService.regenerateInviteCode(teamId, user.id)
             call.respond(SuccessResponse(data = response))
+        }
+
+        get("/{id}/members") {
+            val user = currentUser
+            val teamId = call.parameters["id"]?.toLongOrNull()
+                ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid team ID")
+            val members = teamService.getTeamMembers(teamId, user.id)
+            call.respond(SuccessResponse(data = members))
+        }
+
+        patch("/{id}/members/{userId}") {
+            val user = currentUser
+            val teamId = call.parameters["id"]?.toLongOrNull()
+                ?: return@patch call.respond(HttpStatusCode.BadRequest, "Invalid team ID")
+            val targetUserId = call.parameters["userId"]?.toLongOrNull()
+                ?: return@patch call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+            val request = call.receive<UpdateMemberRequest>()
+            val response = teamService.updateMemberRole(teamId, targetUserId, user.id, request.role)
+            call.respond(SuccessResponse(data = response))
+        }
+
+        delete("/{id}/members/{userId}") {
+            val user = currentUser
+            val teamId = call.parameters["id"]?.toLongOrNull()
+                ?: return@delete call.respond(HttpStatusCode.BadRequest, "Invalid team ID")
+            val targetUserId = call.parameters["userId"]?.toLongOrNull()
+                ?: return@delete call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+            teamService.removeMember(teamId, targetUserId, user.id)
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        delete("/{id}/leave") {
+            val user = currentUser
+            val teamId = call.parameters["id"]?.toLongOrNull()
+                ?: return@delete call.respond(HttpStatusCode.BadRequest, "Invalid team ID")
+            teamService.leaveTeam(teamId, user.id)
+            call.respond(HttpStatusCode.NoContent)
         }
     }
 }

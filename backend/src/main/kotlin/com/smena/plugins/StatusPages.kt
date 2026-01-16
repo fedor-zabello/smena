@@ -2,12 +2,7 @@ package com.smena.plugins
 
 import com.smena.dto.ErrorDetail
 import com.smena.dto.ErrorResponse
-import com.smena.exceptions.AlreadyTeamMemberException
-import com.smena.exceptions.ForbiddenException
-import com.smena.exceptions.InvalidInitDataException
-import com.smena.exceptions.InvalidInviteCodeException
-import com.smena.exceptions.TeamNotFoundException
-import com.smena.exceptions.UnauthorizedException
+import com.smena.exceptions.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
@@ -82,6 +77,42 @@ fun Application.configureStatusPages() {
                     error = ErrorDetail(
                         code = "ALREADY_TEAM_MEMBER",
                         message = cause.message ?: "Already a member of this team"
+                    )
+                )
+            )
+        }
+
+        exception<MemberNotFoundException> { call, cause ->
+            call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "MEMBER_NOT_FOUND",
+                        message = cause.message ?: "Member not found"
+                    )
+                )
+            )
+        }
+
+        exception<CannotRemoveLastAdminException> { call, cause ->
+            call.respond(
+                HttpStatusCode.Conflict,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "CANNOT_REMOVE_LAST_ADMIN",
+                        message = cause.message ?: "Cannot remove the last admin from the team"
+                    )
+                )
+            )
+        }
+
+        exception<InvalidRoleException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "INVALID_ROLE",
+                        message = cause.message ?: "Invalid role"
                     )
                 )
             )

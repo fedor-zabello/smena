@@ -23,6 +23,13 @@ class UserRepository {
             .singleOrNull()
     }
 
+    fun findByIds(ids: List<Long>): List<User> = transaction {
+        if (ids.isEmpty()) return@transaction emptyList()
+        Users.selectAll()
+            .where { Users.id inList ids }
+            .map { it.toUser() }
+    }
+
     fun create(telegramUser: TelegramUser): User = transaction {
         val id = Users.insertAndGetId {
             it[telegramId] = telegramUser.id
