@@ -1,6 +1,7 @@
 package com.smena.routes
 
 import com.smena.dto.CreateTeamRequest
+import com.smena.dto.JoinTeamRequest
 import com.smena.dto.SuccessResponse
 import com.smena.plugins.currentUser
 import com.smena.services.TeamService
@@ -22,6 +23,13 @@ fun Route.teamRoutes(teamService: TeamService) {
             val user = currentUser
             val teams = teamService.getUserTeams(user.id)
             call.respond(SuccessResponse(data = teams))
+        }
+
+        post("/join") {
+            val request = call.receive<JoinTeamRequest>()
+            val user = currentUser
+            val response = teamService.joinTeam(request.inviteCode, user.id)
+            call.respond(SuccessResponse(data = response))
         }
 
         get("/{id}") {

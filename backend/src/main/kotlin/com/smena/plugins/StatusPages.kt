@@ -2,8 +2,10 @@ package com.smena.plugins
 
 import com.smena.dto.ErrorDetail
 import com.smena.dto.ErrorResponse
+import com.smena.exceptions.AlreadyTeamMemberException
 import com.smena.exceptions.ForbiddenException
 import com.smena.exceptions.InvalidInitDataException
+import com.smena.exceptions.InvalidInviteCodeException
 import com.smena.exceptions.TeamNotFoundException
 import com.smena.exceptions.UnauthorizedException
 import io.ktor.http.*
@@ -56,6 +58,30 @@ fun Application.configureStatusPages() {
                     error = ErrorDetail(
                         code = "FORBIDDEN",
                         message = cause.message ?: "Access denied"
+                    )
+                )
+            )
+        }
+
+        exception<InvalidInviteCodeException> { call, cause ->
+            call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "INVALID_INVITE_CODE",
+                        message = cause.message ?: "Invalid invite code"
+                    )
+                )
+            )
+        }
+
+        exception<AlreadyTeamMemberException> { call, cause ->
+            call.respond(
+                HttpStatusCode.Conflict,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "ALREADY_TEAM_MEMBER",
+                        message = cause.message ?: "Already a member of this team"
                     )
                 )
             )

@@ -2,7 +2,9 @@ package com.smena.services
 
 import com.smena.dto.TeamResponse
 import com.smena.dto.toResponse
+import com.smena.exceptions.AlreadyTeamMemberException
 import com.smena.exceptions.ForbiddenException
+import com.smena.exceptions.InvalidInviteCodeException
 import com.smena.exceptions.TeamNotFoundException
 import com.smena.models.TeamRole
 import com.smena.repositories.TeamMemberRepository
@@ -38,5 +40,19 @@ class TeamService(
 
         val memberCount = teamMemberRepository.findAllByTeamId(teamId).size
         return team.toResponse(role = membership.role.name, memberCount = memberCount)
+    }
+
+    fun joinTeam(inviteCode: String, userId: Long): TeamResponse {
+        val team = teamRepository.findByInviteCode(inviteCode)
+            ?: throw InvalidInviteCodeException()
+
+        val existingMembership = teamMemberRepository.findByUserAndTeam(userId, team.id)
+        if (existingMembership != null) {
+            throw AlreadyTeamMemberException()
+        }
+
+        teamMemberRepository.create(userId, team.id, TeamRole.PLAYER)
+        val memberCount = teamMemberRepository.findAllByTeamId(team.id).size
+        return team.toResponse(role = TeamRole.PLAYER.name, memberCount = memberCount)
     }
 }
