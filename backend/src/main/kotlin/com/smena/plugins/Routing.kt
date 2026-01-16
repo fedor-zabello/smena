@@ -2,8 +2,10 @@ package com.smena.plugins
 
 import com.smena.dto.SuccessResponse
 import com.smena.routes.authRoutes
+import com.smena.routes.eventRoutes
 import com.smena.routes.teamRoutes
 import com.smena.services.AuthService
+import com.smena.services.EventService
 import com.smena.services.TeamService
 import io.ktor.server.auth.*
 import io.ktor.server.application.*
@@ -15,6 +17,7 @@ fun Application.configureRouting() {
     val botToken = environment.config.property("telegram.botToken").getString()
     val authService = AuthService(botToken)
     val teamService = TeamService()
+    val eventService = EventService()
 
     routing {
         get("/") {
@@ -33,6 +36,7 @@ fun Application.configureRouting() {
 
             authenticate("tma") {
                 teamRoutes(teamService)
+                eventRoutes(eventService)
             }
         }
     }

@@ -118,6 +118,42 @@ fun Application.configureStatusPages() {
             )
         }
 
+        exception<EventNotFoundException> { call, cause ->
+            call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "EVENT_NOT_FOUND",
+                        message = cause.message ?: "Event not found"
+                    )
+                )
+            )
+        }
+
+        exception<InvalidEventTypeException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "INVALID_EVENT_TYPE",
+                        message = cause.message ?: "Invalid event type"
+                    )
+                )
+            )
+        }
+
+        exception<InvalidEventDateException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "INVALID_EVENT_DATE",
+                        message = cause.message ?: "Invalid event date or time"
+                    )
+                )
+            )
+        }
+
         exception<Throwable> { call, cause ->
             call.application.log.error("Unhandled exception", cause)
             call.respond(
