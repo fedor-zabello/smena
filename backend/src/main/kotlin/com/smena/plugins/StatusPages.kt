@@ -154,6 +154,42 @@ fun Application.configureStatusPages() {
             )
         }
 
+        exception<RegistrationNotOpenException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "REGISTRATION_NOT_OPEN",
+                        message = cause.message ?: "Registration is not open for this event"
+                    )
+                )
+            )
+        }
+
+        exception<RegistrationNotFoundException> { call, cause ->
+            call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "REGISTRATION_NOT_FOUND",
+                        message = cause.message ?: "Registration not found"
+                    )
+                )
+            )
+        }
+
+        exception<InvalidRegistrationStatusException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "INVALID_REGISTRATION_STATUS",
+                        message = cause.message ?: "Invalid registration status"
+                    )
+                )
+            )
+        }
+
         exception<Throwable> { call, cause ->
             call.application.log.error("Unhandled exception", cause)
             call.respond(
