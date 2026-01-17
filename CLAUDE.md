@@ -153,6 +153,80 @@ cd frontend && npm run dev
 cd frontend && npm test
 ```
 
+## Тестирование API
+
+Для тестирования защищённых endpoints используй скрипт генерации initData:
+
+```bash
+# Генерация initData для тестового пользователя
+INIT_DATA=$(kotlin scripts/generate-init-data.kts "test_token_for_local_dev" 123456 "TestUser" "LastName" "username")
+
+# Пример: авторизация
+curl -X POST http://localhost:8080/api/auth/init \
+  -H "Content-Type: application/json" \
+  -d "{\"initData\": \"$INIT_DATA\"}"
+
+# Пример: запрос к защищённому endpoint
+curl -X GET http://localhost:8080/api/teams \
+  -H "Authorization: tma $INIT_DATA"
+```
+
+**Параметры скрипта:**
+```
+kotlin scripts/generate-init-data.kts [botToken] [userId] [firstName] [lastName] [username]
+```
+
+- `botToken` — токен бота (по умолчанию: `test_token_for_local_dev`)
+- `userId` — Telegram ID пользователя
+- `firstName`, `lastName`, `username` — данные пользователя
+
+## Тестирование
+
+### Стратегия тестирования
+
+| Слой | Тип теста | Что тестируем |
+|------|-----------|---------------|
+| Services | Юнит-тесты | Бизнес-логика, валидации, edge cases. MockK для моков репозиториев |
+| API endpoints | Интеграционные | HTTP контракты, статусы, авторизация. Ktor testApplication + Testcontainers |
+| Repositories | Пропускаем | Тестируются через интеграционные тесты |
+
+### Scope тестов
+
+- **Happy path** — основной сценарий работает
+- **Основные ошибки** — 401/403/404, валидация входных данных
+
+### Инструменты
+
+- **JUnit 5** — тестовый фреймворк
+- **MockK** — моки для Kotlin
+- **Ktor testApplication** — тестирование HTTP без сервера
+- **Testcontainers** — PostgreSQL в Docker для интеграционных тестов
+
+### Когда писать тесты
+
+- Юнит-тесты сервиса — сразу после реализации сервиса
+- Интеграционные тесты API — после реализации endpoint (вместо ручного curl)
+
+### Структура тестов
+
+```
+backend/src/test/kotlin/com/smena/
+├── unit/
+│   └── services/
+│       ├── AuthServiceTest.kt
+│       ├── TeamServiceTest.kt
+│       └── ...
+├── integration/
+│   ├── BaseIntegrationTest.kt
+│   ├── TestDatabaseContainer.kt
+│   └── routes/
+│       ├── AuthRoutesTest.kt
+│       ├── TeamRoutesTest.kt
+│       └── ...
+└── utils/
+    └── TestInitDataGenerator.kt
+```
+
 ## Контекст для AI
 
 Когда я прошу что-то сделать без указания тикета — сначала спроси, к какому тикету это относится, или предложи создать новый.

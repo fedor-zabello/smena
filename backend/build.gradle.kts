@@ -25,6 +25,9 @@ val postgresVersion = "42.7.4"
 val hikariVersion = "6.2.1"
 val logbackVersion = "1.5.15"
 val flywayVersion = "11.20.0"
+val junitVersion = "6.0.2"
+val mockkVersion = "1.14.7"
+val testcontainersVersion = "1.21.4"
 
 dependencies {
     // Ktor Server
@@ -52,7 +55,17 @@ dependencies {
 
     // Testing
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:2.3.0")
+    testImplementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 kotlin {

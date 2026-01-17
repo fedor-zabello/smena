@@ -28,6 +28,10 @@ data class UserPrincipal(val user: User)
  */
 fun Application.configureAuthentication() {
     val botToken = environment.config.property("telegram.botToken").getString()
+    configureAuthentication(botToken)
+}
+
+fun Application.configureAuthentication(botToken: String) {
     val userRepository = UserRepository()
 
     install(Authentication) {
