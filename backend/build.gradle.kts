@@ -17,6 +17,7 @@ application {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 val ktorVersion = "3.3.3"
@@ -25,6 +26,7 @@ val postgresVersion = "42.7.4"
 val hikariVersion = "6.2.1"
 val logbackVersion = "1.5.15"
 val flywayVersion = "11.20.0"
+val telegramBotVersion = "6.3.0"
 val junitVersion = "6.0.2"
 val mockkVersion = "1.14.7"
 val testcontainersVersion = "1.21.4"
@@ -52,6 +54,9 @@ dependencies {
 
     // Logging
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
+
+    // Telegram Bot
+    implementation("io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:$telegramBotVersion")
 
     // Testing
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")

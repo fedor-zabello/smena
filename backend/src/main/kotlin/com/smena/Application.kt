@@ -3,6 +3,7 @@ package com.smena
 import com.smena.db.DatabaseFactory
 import com.smena.plugins.*
 import com.smena.services.RegistrationOpenerService
+import com.smena.telegram.TelegramBot
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -21,7 +22,13 @@ fun Application.module() {
     val registrationOpenerService = RegistrationOpenerService()
     registrationOpenerService.start(this)
 
+    val botToken = environment.config.property("telegram.botToken").getString()
+    val miniAppUrl = environment.config.property("telegram.miniAppUrl").getString()
+    val telegramBot = TelegramBot(botToken, miniAppUrl)
+    telegramBot.start(this)
+
     monitor.subscribe(ApplicationStopped) {
         registrationOpenerService.stop()
+        telegramBot.stop()
     }
 }
