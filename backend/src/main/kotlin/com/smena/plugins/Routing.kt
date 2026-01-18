@@ -3,10 +3,12 @@ package com.smena.plugins
 import com.smena.dto.SuccessResponse
 import com.smena.routes.authRoutes
 import com.smena.routes.eventRoutes
+import com.smena.routes.lineupRoutes
 import com.smena.routes.registrationRoutes
 import com.smena.routes.teamRoutes
 import com.smena.services.AuthService
 import com.smena.services.EventService
+import com.smena.services.LineupService
 import com.smena.services.RegistrationService
 import com.smena.services.TeamService
 import io.ktor.server.auth.*
@@ -21,6 +23,7 @@ fun Application.configureRouting() {
     val teamService = TeamService()
     val eventService = EventService()
     val registrationService = RegistrationService()
+    val lineupService = LineupService()
 
     routing {
         get("/") {
@@ -41,6 +44,7 @@ fun Application.configureRouting() {
                 teamRoutes(teamService)
                 eventRoutes(eventService)
                 registrationRoutes(registrationService)
+                lineupRoutes(lineupService)
             }
         }
     }

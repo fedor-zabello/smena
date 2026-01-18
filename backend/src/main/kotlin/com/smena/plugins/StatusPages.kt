@@ -190,6 +190,30 @@ fun Application.configureStatusPages() {
             )
         }
 
+        exception<InvalidLineupException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "INVALID_LINEUP",
+                        message = cause.message ?: "Invalid lineup"
+                    )
+                )
+            )
+        }
+
+        exception<InvalidLineGroupException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = ErrorDetail(
+                        code = "INVALID_LINE_GROUP",
+                        message = cause.message ?: "Invalid line group"
+                    )
+                )
+            )
+        }
+
         exception<Throwable> { call, cause ->
             call.application.log.error("Unhandled exception", cause)
             call.respond(

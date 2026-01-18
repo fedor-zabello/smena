@@ -3,10 +3,12 @@ package com.smena.integration
 import com.smena.plugins.*
 import com.smena.routes.authRoutes
 import com.smena.routes.eventRoutes
+import com.smena.routes.lineupRoutes
 import com.smena.routes.registrationRoutes
 import com.smena.routes.teamRoutes
 import com.smena.services.AuthService
 import com.smena.services.EventService
+import com.smena.services.LineupService
 import com.smena.services.RegistrationService
 import com.smena.services.TeamService
 import com.smena.utils.TestInitDataGenerator
@@ -46,6 +48,7 @@ abstract class BaseIntegrationTest {
             val teamService = TeamService()
             val eventService = EventService()
             val registrationService = RegistrationService()
+            val lineupService = LineupService()
 
             routing {
                 route("/api") {
@@ -55,6 +58,7 @@ abstract class BaseIntegrationTest {
                         teamRoutes(teamService)
                         eventRoutes(eventService)
                         registrationRoutes(registrationService)
+                        lineupRoutes(lineupService)
                     }
                 }
             }
