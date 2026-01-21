@@ -3,6 +3,7 @@ package com.smena.telegram
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.command
+import com.github.kotlintelegrambot.dispatcher.telegramError
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
@@ -37,6 +38,7 @@ class TelegramBot(
 
         dispatch {
             command("start") {
+                logger.info("Received /start command from chat ${message.chat.id}, user ${message.from?.id}")
                 val inviteCode = args.firstOrNull()
                 val chatId = ChatId.fromId(message.chat.id)
 
@@ -48,19 +50,29 @@ class TelegramBot(
             }
 
             command("connect") {
+                logger.info("Received /connect command from chat ${message.chat.id}, user ${message.from?.id}")
                 val inviteCode = args.firstOrNull()
                 val chatId = ChatId.fromId(message.chat.id)
                 val senderTelegramId = message.from?.id
 
                 handleConnect(chatId, message.chat.id, senderTelegramId, inviteCode)
             }
+
+            telegramError {
+                logger.error("Telegram API error: ${error.getErrorMessage()}", error.exception)
+            }
         }
     }
 
     fun start(scope: CoroutineScope) {
         job = scope.launch(Dispatchers.IO) {
-            logger.info("TelegramBot starting with long polling...")
-            bot.startPolling()
+            try {
+                logger.info("TelegramBot starting with long polling...")
+                bot.startPolling()
+                logger.warn("TelegramBot polling loop finished unexpectedly")
+            } catch (e: Exception) {
+                logger.error("Failed to start or run TelegramBot polling", e)
+            }
         }
     }
 
@@ -89,13 +101,18 @@ class TelegramBot(
             )
         )
 
-        bot.sendMessage(
+        val result = bot.sendMessage(
             chatId = chatId,
             text = text,
             replyMarkup = keyboard
         )
 
-        logger.debug("Sent welcome message to chat $chatId")
+        result.fold(
+            ifSuccess = { /* success, no need to log */ },
+            ifError = { error ->
+                logger.error("Failed to send /start message to chat $chatId: ${error.errorBody}")
+            }
+        )
     }
 
     private fun handleStartWithInviteCode(chatId: ChatId, inviteCode: String) {
@@ -116,13 +133,18 @@ class TelegramBot(
             )
         )
 
-        bot.sendMessage(
+        val result = bot.sendMessage(
             chatId = chatId,
             text = text,
             replyMarkup = keyboard
         )
 
-        logger.debug("Sent invite message to chat $chatId with code $inviteCode")
+        result.fold(
+            ifSuccess = { /* success, no need to log */ },
+            ifError = { error ->
+                logger.error("Failed to send /start invite message to chat $chatId: ${error.errorBody}")
+            }
+        )
     }
 
     private fun handleConnect(chatId: ChatId, rawChatId: Long, senderTelegramId: Long?, inviteCode: String?) {
